@@ -1,6 +1,6 @@
 <center> <h2> POWSC: A computational tool for power analysis in scRNA-seq </h2> </center>
 
-POWSC is a R package designed for scRNA-seq with a wild range of usage. It can play three roles: parameter estimator, data simulator, *power assessor*. All the copyrights are explaned by Kenong Su <kenong.su@emroy.edu> and Dr. Wu's lab <http://www.haowulab.org>.
+POWSC is a R package designed for scRNA-seq with a wild range of usage. It can play three roles: parameter estimator, data simulator, **power assessor**. All the copyrights are explaned by Kenong Su <kenong.su@emroy.edu> and Dr. Wu's lab <http://www.haowulab.org>.
 
 ### 1. Software Installation
 ```
