@@ -1,0 +1,21 @@
+import(limma)
+import(Biobase)
+import(ROCR)
+import(MAST)
+import(qvalue)
+import(SingleCellExperiment)
+
+export(
+    Eset2Phase,
+    GenerateCountMatrix,
+    Simulate2SCE,
+    SimulateMultiSCEs,
+    runMAST,
+    runBPSC,
+    PowerEst,
+    Power_Disc,
+    Power_Cont,
+    runPOWSC,
+    plot.POWSC,
+    summary.POWSC
+)

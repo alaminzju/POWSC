@@ -1,0 +1,25 @@
+Package: POWSC
+Type: Package
+Title: Power assessment for scRNA 
+Version: 0.1.0
+Author: Kenong Su, Hao Wu
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: First Rotation Project With Hao Wu
+License: What license is it under?
+Encoding: UTF-8
+Imports:
+    limma,
+    SingleCellExperiment,
+    Biobase,
+    MAST,
+    parallel,
+    ROCR
+Suggests:
+    MAST,
+    SingleCellExperiment,
+    BPSC,
+    scDD,
+    scde,
+    knitr
+LazyData: true
+VignetteBuilder: knitr
