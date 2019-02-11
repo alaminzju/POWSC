@@ -5,7 +5,7 @@ POWSC is a R package designed for scRNA-seq with a wild range of usage. It can p
 ### 1. Software Installation
 ```
 library(devtools)
-install_github("suke18/POWSC", build_vignettes=TRUE)
+install_github("suke18/POWSC")
 R CMD INSTALL POWSC_0.1.0.tar.gz
 ```
 
