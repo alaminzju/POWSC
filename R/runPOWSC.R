@@ -45,51 +45,97 @@ runPOWSC = function(sim_size = c(50, 100, 200, 800, 1000), per_DE = 0.05, est_Pa
 }
 
 ######## Plot ########
-plot.POWSC = function(POWSCobj, Phase = c("I", "II")){
-    pow1_mat = do.call(rbind, lapply(POWSCobj, function(x) x$pow1$power))
-    pow2_mat = do.call(rbind, lapply(POWSCobj, function(x) x$pow2$power))
-    nrep = rownames(pow1_mat)
-    nm1 = names(POWSCobj[[1]][[1]][[1]])
-    nm2 = names(POWSCobj[[1]][[2]][[1]])
-    pow1 = data.frame(Strata = rep(nm1, each = nrow(pow1_mat)), Power = as.vector(pow1_mat), Reps = rep(nrep, ncol(pow1_mat)))
-    pow2 = data.frame(Strata = rep(nm2, each = nrow(pow2_mat)), Power = as.vector(pow2_mat), Reps = rep(nrep, ncol(pow2_mat)))
-    pow1$Strata = factor(pow1$Strata, levels = nm1); pow2$Strata = factor(pow2$Strata, levels = nm2)
-    Ph = match.arg(Phase)
-    if (Ph == "I"){
-        pow = pow1
-        tit = ggtitle("DE from Phase I")
-        tmpxlab = xlab("strata of zero ratios across samples")
-    }else{
-        pow = pow2
-        tit = ggtitle("DE from Phase II")
-        tmpxlab = xlab("strata of average reads")
+plot.POWSC = function(POWSCobj, Form = c("I", "II"), Cell_Type = c("PW", "Multi")){
+    Cell_Type = match.arg(Cell_Type)
+    Form = match.arg(Form)
+    if (Cell_Type == "Multi"){
+        colors = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100)
+        sim_size = names(POWSCobj)
+        for (tmp_size in sim_size){
+            tmp_pow_rslt = POWSCobj[[tmp_size]]
+            pow1_mat = do.call(rbind, lapply(tmp_pow_rslt$pow1, function(x) x$power))
+            pow2_mat = do.call(rbind, lapply(tmp_pow_rslt$pow2, function(x) x$power))
+            colnames(pow1_mat) = names(POWSCobj[[1]][[1]][[1]][[1]])
+            colnames(pow2_mat) = names(POWSCobj[[1]][[2]][[1]][[1]])
+            if (Form == "I"){
+                pow = pow1_mat
+            }else{
+                pow = pow2_mat
+            }
+            pheatmap(pow,display_numbers = T, color=colors, show_rownames = T, 
+                     cellwidth = 50, cellheight = 50, legend = T, 
+                     border_color = "grey96", na_col = "grey",
+                     cluster_row = FALSE, cluster_cols = FALSE,
+                     breaks = seq(0, 1, 0.01),
+                     main = paste0("Total Cell Number = ", tmp_size))
+        }
     }
-    gp = ggplot(pow, aes(x=Strata, y=Power, group=Reps, color=Reps)) +
-        geom_line(aes(color=Reps, linetype = Reps), size = 0.6)+
-        geom_point(aes(color=Reps, shape = Reps), size = 1.5) +
-        scale_colour_brewer(palette = "Set1") +
-        tmpxlab + ylab("power") + theme_classic() +
-        scale_y_continuous(breaks=seq(0,1,by=0.1),limits = c(0, 1), labels=seq(0,1,by=0.1))+
-        theme(legend.position = c(0.5, 0.1), legend.direction = "horizontal") +
-        theme(plot.title = element_text(size=16, face="bold"))+ tit
-    plot(gp)
+    else{
+        pow1_mat = do.call(rbind, lapply(POWSCobj, function(x) x$pow1$power))
+        pow2_mat = do.call(rbind, lapply(POWSCobj, function(x) x$pow2$power))
+        nrep = rownames(pow1_mat)
+        nm1 = names(POWSCobj[[1]][[1]][[1]])
+        nm2 = names(POWSCobj[[1]][[2]][[1]])
+        pow1 = data.frame(Strata = rep(nm1, each = nrow(pow1_mat)), Power = as.vector(pow1_mat), Reps = rep(nrep, ncol(pow1_mat)), stringsAsFactors = F)
+        pow2 = data.frame(Strata = rep(nm2, each = nrow(pow2_mat)), Power = as.vector(pow2_mat), Reps = rep(nrep, ncol(pow2_mat)), stringsAsFactors = F)
+        pow1$Strata = factor(pow1$Strata, levels = nm1); pow2$Strata = factor(pow2$Strata, levels = nm2)
+        pow1$Reps = factor(pow1$Reps, levels = unique(pow1$Reps)); pow2$Reps = factor(pow2$Reps, levels = unique(pow2$Reps))
+        if (Form == "I"){
+            pow = pow1
+            tit = ggtitle("Form I DE genes")
+            tmpxlab = xlab("strata of zero ratios across samples")
+        }else{
+            pow = pow2
+            tit = ggtitle("Form II DE genes")
+            tmpxlab = xlab("strata of average reads")
+        }
+        gp = ggplot(pow, aes(x=Strata, y=Power, group=Reps, color=Reps)) +
+            geom_line(aes(color=Reps, linetype = Reps), size = 0.6)+
+            geom_point(aes(color=Reps, shape = Reps), size = 1.5) +
+            scale_colour_brewer(palette = "Set1") +
+            tmpxlab + ylab("power") + theme_classic() +
+            scale_y_continuous(breaks=seq(0,1,by=0.1),limits = c(0, 1), labels=seq(0,1,by=0.1))+
+            theme(legend.position = c(0.5, 0.1), legend.direction = "horizontal") +
+            theme(plot.title = element_text(size=16, face="bold"))+ tit
+        plot(gp)
+    }
 }
 
 ######## Summary Table ########
-summary.POWSC = function(POWSCobj, Phase = c("I", "II")){
-    pow1_mat = round(do.call(rbind, lapply(POWSCobj, function(x) x$pow1$power)), 4)
-    pow2_mat = round(do.call(rbind, lapply(POWSCobj, function(x) x$pow2$power)), 4)
-    nm1 = names(POWSCobj[[1]][[1]][[1]])
-    nm2 = names(POWSCobj[[1]][[2]][[1]])
-    colnames(pow1_mat) = nm1
-    colnames(pow2_mat) = nm2
-    Ph = match.arg(Phase)
-    if (Ph == "I"){
-        tab = pow1_mat
+summary.POWSC = function(POWSCobj, Form = c("I", "II"), Cell_Type = c("PW", "Multi")){
+    Cell_Type = match.arg(Cell_Type)
+    Form = match.arg(Form)
+    if (Cell_Type == "Multi"){
+        pow_tab = NULL
+        sim_size = names(POWSCobj)
+        for (tmp_size in sim_size){
+            tmp_pow_rslt = POWSCobj[[tmp_size]]
+            pow1_mat = do.call(rbind, lapply(tmp_pow_rslt$pow1, function(x) x$power))
+            pow2_mat = do.call(rbind, lapply(tmp_pow_rslt$pow2, function(x) x$power))
+            colnames(pow1_mat) = names(POWSCobj[[1]][[1]][[1]][[1]])
+            colnames(pow2_mat) = names(POWSCobj[[1]][[2]][[1]][[1]])
+            if (Form == "I"){
+                pow = pow1_mat
+            }else{
+                pow = pow2_mat
+            }
+            pow_tab[[tmp_size]] = pow
+        }
+        return(pow_tab)
     }else{
-        tab = pow2_mat
+        pow1_mat = round(do.call(rbind, lapply(POWSCobj, function(x) x$pow1$power)), 4)
+        pow2_mat = round(do.call(rbind, lapply(POWSCobj, function(x) x$pow2$power)), 4)
+        nm1 = names(POWSCobj[[1]][[1]][[1]])
+        nm2 = names(POWSCobj[[1]][[2]][[1]])
+        colnames(pow1_mat) = nm1
+        colnames(pow2_mat) = nm2
+        if (Form == "I"){
+            tab = pow1_mat
+        }else{
+            tab = pow2_mat
+        }
+        return(tab)
     }
-    return(tab)
 }
 
 
