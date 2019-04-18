@@ -9,6 +9,7 @@ License: GPL-2
 Encoding: UTF-8
 Imports:
     limma,
+    SummarizedExperiment,
     SingleCellExperiment,
     Biobase,
     SC2P,
@@ -17,10 +18,10 @@ Imports:
     ROCR
 Suggests:
     MAST,
-    SingleCellExperiment,
     BPSC,
     scDD,
     scde,
     knitr
 LazyData: true
 VignetteBuilder: knitr
+RoxygenNote: 6.1.1

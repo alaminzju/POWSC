@@ -1,12 +1,11 @@
 import(limma)
-import(Biobase)
 import(ROCR)
 import(MAST)
-import(qvalue)
 import(SingleCellExperiment)
+importFrom(SummarizedExperiment, assays)
 
 export(
-    Eset2Phase,
+    Est2Phase,
     GenerateCountMatrix,
     Simulate2SCE,
     SimulateMultiSCEs,

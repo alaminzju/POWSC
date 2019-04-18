@@ -46,80 +46,13 @@ GenerateCountMatrix <- function(pi.g, p0, lambda, mu, sigma, sf){
     return(Y)
 }
 
-######################################################################
-########## Function 1 use one cell type to simulate another ########## 
-######################################################################
-# SimulateEset = function(n1 = 100, n2 = 100, perDE = 0.05, estParas) {
-#     # Parameters from estimations
-#     pi.g = estParas$pi.g
-#     p0 = estParas$p0
-#     lambda = estParas$lambda
-#     mu = estParas$mu
-#     sigma = estParas$sd
-#     sf = estParas$sf
-# 
-#     ngene = length(pi.g)
-#     nDE1 = nDE2 = ngene * perDE
-#     ## simulate index for DE genes.
-#     ## I'm picking from genes with large means.
-#     ## If DE genes are for genes with very small mean, they won't be detected.
-#     n0 = sum(mu >= 3)
-#     ix.highGenes = order(mu, decreasing=TRUE)[1:n0]
-#     ix.DE1 = sample(ix.highGenes, nDE1)
-#     ix.DE2 = sample(ix.highGenes, nDE2)
-# 
-#     ix.DEs = union(ix.DE1, ix.DE2)
-#     ## general parameters in both groups
-#     sf1 = sample(sf, n1, replace=TRUE)
-#     sf2 = sample(sf, n2, replace=TRUE)
-#     p0.1 = sample(p0, n1, replace=TRUE )
-#     p0.2 = sample(p0, n2, replace=TRUE)
-#     lambda1 = sample(lambda, n1, replace=TRUE)
-#     lambda2= sample(lambda, n2, replace=TRUE)
-# 
-#     ## generate parameters for second group
-#     ## the inputs are assumed to be for first group
-#     ## for mixing proportion
-#     
-#     ## for zero ratio in phase I 
-#     pi.g2 = pi.g
-#     tmp = pi.g[ix.DE1]
-#     tmp[tmp<0.5] = tmp[tmp<0.5] + runif(sum(tmp<0.5), 0.1, 0.3)
-#     tmp[tmp>=0.5] = tmp[tmp>=0.5] - runif(sum(tmp>=0.5), 0.1, 0.3)
-#     pi.g2[ix.DE1] = tmp
-#     pi.df = pi.g2 - pi.g
-#     
-#     ## for mean expression in phase II
-#     mu2 = mu
-#     tmp = c(rnorm(1000, mean=-1, sd=1), rnorm(1000, mean=1, sd=1))
-#     mu.diff = sample(tmp, length(ix.DE2))
-#     mu2[ix.DE2] = mu[ix.DE2] + mu.diff
-#     ## I will not change the variance parameters (sigma or phi will be the same in two groups)
-# 
-#     ## For Phase II DEGs lfc
-#     lfc  = mu.diff
-#     ## generate counts in two groups
-#     y1 = GenerateCountMatrix(pi.g, p0.1, lambda1, mu, sigma, sf1)
-#     y2 = GenerateCountMatrix(pi.g2, p0.2, lambda2, mu2, sigma, sf2)
-#     y = cbind(y1, y2)
-#     rownames(y) = paste0("g", 1:nrow(y))
-#     celltype = rep(paste0("celltype", c(1,2)), c(n1, n2))
-#     phenoData = new("AnnotatedDataFrame", data = data.frame(celltype = celltype))
-#     eset = ExpressionSet(assayData = y,
-#                           phenoData = phenoData)
-#     DEGs = paste0("g", union(ix.DE1, ix.DE2))
-#     list(ix.DE1=ix.DE1, ix.DE2=ix.DE2, ix.DEs = ix.DEs, DEGs = DEGs, eset=eset,
-#          pi.g1=pi.g, pi.g2=pi.g2, mu1=mu, mu2=mu2, lfc = lfc, pi.df=pi.df, ngenes = ngene)
-# }
-# 
-
 
 
 
 
 
 ##################################################################
-####### Function 2 considering two (pair-wised) conditions ####### 
+####### Function 1 considering two (pair-wised) conditions ####### 
 ##################################################################
 Simulate2SCE = function(n = 100, perDE = 0.05, estParas1, estParas2) {
     # equally divide the sample size 
@@ -192,7 +125,7 @@ Simulate2SCE = function(n = 100, perDE = 0.05, estParas1, estParas2) {
 
 
 ##################################################################
-##### Function 3 considering a mixture cell type conditions ######
+##### Function 2 considering a mixture cell type conditions ######
 ##################################################################
 SimulateMultiSCEs = function(n = 100, perDE = 0.05, estParas, multiProb) {
     ## Parameters from estimations

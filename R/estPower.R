@@ -50,7 +50,16 @@ PowerEst = function(fdr, alpha, Zg, Zg2, xgr){
          FDR=FDR, FDR.marginal=FDR.marginal)
 }
 
-
+#' Run DE analysis by using MAST. Here we output two result tables corresponding to two forms of DE genes.  
+#' These parameters include four gene-wise parameters and two cell-wise parameters. 
+#' 
+#' @param DErslt is from the DE analysis by MAST
+#' @param simData is the corresponding simulated scRNA-seq dataset (SingCellExperiment)
+#' @param alpha is the cutoff for the fdr which can be modified
+#' @param delta or the lfc is the cutoff (=0.5) used to determined the high DE genes for Form II
+#' @param strata can be modified by the user. By default, it is (0, 10], (10, 20], (20, 40], (40, 80], (80, Inf]
+#' @return a list of metrics for power analysis such as: stratified targeted power and marginal power. 
+#' @export Power_Cont
 ## Continous case corresponding to the Phase II DE, delta means lfc
 Power_Cont = function(DErslt, simData, alpha = 0.1, delta = 0.5, strata = c(0,10,2^(1:4)*10,Inf)){
     fdrvec = DErslt$cont$fdr
@@ -84,6 +93,17 @@ Power_Cont = function(DErslt, simData, alpha = 0.1, delta = 0.5, strata = c(0,10
 }
 
 
+
+#' Run DE analysis by using MAST. Here we output two result tables corresponding to two forms of DE genes.  
+#' These parameters include four gene-wise parameters and two cell-wise parameters. 
+#' 
+#' @param DErslt is from the DE analysis by MAST
+#' @param simData is the corresponding simulated scRNA-seq dataset (SingCellExperiment)
+#' @param alpha is the cutoff for the fdr which can be modified
+#' @param delta or the zero ratio change is the cutoff (=0.1) used to determined the high DE genes for Form II
+#' @param strata can be modified by the user. By default, it is (0, 0.2], (0.2, 0.4], (0.4, 0.6], (0.6, 0.8], (0.8, 1]
+#' @return a list of metrics for power analysis such as: stratified targeted power and marginal power. 
+#' @export Power_Disc
 ## Discreate case corresponding to the Phase I DE, delta means pi.df
 Power_Disc = function(DErslt, simData, alpha = 0.1, delta = 0.1, strata = seq(0, 1, by = 0.2)){
     fdrvec = DErslt$disc$fdr

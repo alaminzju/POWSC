@@ -20,8 +20,8 @@ runSC2P = function(sce) {
     rawEset = toEset(sce = sce); ngene = nrow(sce)
     norm = eset2Phase(rawEset)  ## eset if of class ExpressionSet or eSet
     deSC2P = twoPhaseDE(norm, design = termTotest, test.which=1, offset="sf")
-    discPval = deSC2P$Ph1.pval; discFdr = p.adjust(discPval, method = "BH")
-    contPval = deSC2P$Ph2.pval; contFdr = p.adjust(contPval, method = "BH")
+    discPval = deSC2P$Ph1.pval; discFdr = p.adjust(discPval, method = "fdr")
+    contPval = deSC2P$Ph2.pval; contFdr = p.adjust(contPval, method = "fdr")
     disc = data.frame(geneIndex = 1:length(discPval), pval = discPval, fdr = discFdr)
     cont = data.frame(geneIndex = 1:length(contPval), pval = contPval, fdr = contFdr)
     rownames(disc) = rownames(cont) = rownames(deSC2P)
@@ -29,6 +29,12 @@ runSC2P = function(sce) {
     return(list(table = deSC2P, cont = cont, disc = disc))
 }
 
+#' Run DE analysis by using MAST. Here we output two result tables corresponding to two forms of DE genes.  
+#' These parameters include four gene-wise parameters and two cell-wise parameters. 
+#' 
+#' @param sce is a simulated scRNA-seq dataset with two-group conditions, e.g., treatment vs control. 
+#' @return a list of three tables: the first table summaries the DE result for both forms of DE genes. cont table represents the result for continous case. disc table shows the result for discontinous case. 
+#' @export runMAST
 ## MAST
 runMAST = function(sce) {
     ## grab raw counts and compute log TPM

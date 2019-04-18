@@ -1,3 +1,12 @@
+#' Estimate characterized parameters for a given scRNA-seq data (SingleCellExperiment object or a count matrix). 
+#' 
+#' These parameters include four gene-wise parameters and two cell-wise parameters. 
+#' 
+#' @param sim_size a list of numbers 
+#' @param per_DE the precentage of the DE genes
+#' @param est_Paras the template parameter estimated from one cell type
+#' @return POWSC object
+#' @export runPOWSC
 ######## POWSC ######## 
 runPOWSC = function(sim_size = c(50, 100, 200, 800, 1000), per_DE = 0.05, est_Paras, DE_Method = c("MAST", "SC2P"), 
                     Cell_Type = c("PW", "Multi"), multi_Prob = NULL, 
