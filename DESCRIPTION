@@ -15,6 +15,6 @@ Imports:
     ggplot2,
     pheatmap
 LazyData: true
-Depends: R (>= 3.3.0), Biobase, limma, MAST, ggplot2
+Depends: R (>= 3.3.0), Biobase, limma, MAST, ggplot2, pheatmap
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
