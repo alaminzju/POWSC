@@ -1,6 +1,7 @@
-import(limma)
-import(ROCR)
+import(SC2P)
 import(MAST)
+import(ggplot2)
+import(RColorBrewer)
 import(SingleCellExperiment)
 importFrom(SummarizedExperiment, assays)
 
