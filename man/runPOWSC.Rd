@@ -4,10 +4,17 @@
 \alias{runPOWSC}
 \title{Estimate characterized parameters for a given scRNA-seq data (SingleCellExperiment object or a count matrix).}
 \usage{
-runPOWSC(sim_size = c(50, 100, 200, 800, 1000), per_DE = 0.05,
-  est_Paras, DE_Method = c("MAST", "SC2P"), Cell_Type = c("PW",
-  "Multi"), multi_Prob = NULL, alpha = 0.1, disc_delta = 0.1,
-  cont_delta = 0.5)
+runPOWSC(
+  sim_size = c(50, 100, 200, 800, 1000),
+  per_DE = 0.05,
+  est_Paras,
+  DE_Method = c("MAST", "SC2P"),
+  Cell_Type = c("PW", "Multi"),
+  multi_Prob = NULL,
+  alpha = 0.1,
+  disc_delta = 0.1,
+  cont_delta = 0.5
+)
 }
 \arguments{
 \item{sim_size}{a list of numbers}

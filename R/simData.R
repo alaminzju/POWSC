@@ -52,10 +52,20 @@ GenerateCountMatrix <- function(pi.g, p0, lambda, mu, sigma, sf){
 
 
 ##################################################################
-####### Function 1 considering two (pair-wised) conditions ####### 
+####### Function 1 considering two (pair-wised) conditions #######
 ##################################################################
+
+#' Simulate the data for two-group comparison; e.g., treatment v.s. control
+#' It simulates the DE changes in two forms corresponding two types of DE genes
+#'
+#' @param n the number of total cells for two groups
+#' @param perDE percentage of DE genes
+#' @param estParas1 the set of parameters corresponding to cell type I
+#' @param estParas2 the set of parameters corresponding to cell type II
+#' @return a list of metrics recording the changes in the generated data: such as the DE gene indices for Form I and II DE genes, and simulated expression data in singlecellexperiment format.
+#' @export Simulate2SCE
 Simulate2SCE = function(n = 100, perDE = 0.05, estParas1, estParas2) {
-    # equally divide the sample size 
+    # equally divide the sample size
     n1 = n2 = round(n / 2)
     # Parameters from estimations
     pi.g1 = estParas1$pi.g; pi.g2 = estParas2$pi.g
@@ -64,7 +74,7 @@ Simulate2SCE = function(n = 100, perDE = 0.05, estParas1, estParas2) {
     mu1 = estParas1$mu; mu2 = estParas2$mu
     sigma1 = estParas1$sd; sigma2 = estParas2$sd
     sf1 = estParas1$sf; sf2 = estParas2$sf
-    
+
     if (length(pi.g1) == length(pi.g2)){
         ngene = length(pi.g1)
     }else{
@@ -77,10 +87,10 @@ Simulate2SCE = function(n = 100, perDE = 0.05, estParas1, estParas2) {
     nDE1 = nDE2 = ngene * perDE
     ix1.highGenes = order(mu1, decreasing=TRUE)[1:n0]
     ix2.highGenes = order(mu2, decreasing=TRUE)[1:n0]
-    
+
     ix.DE1 = sample(union(ix1.highGenes, ix2.highGenes), nDE1)
     ix.DE2 = sample(union(ix1.highGenes, ix2.highGenes), nDE2)
-    
+
     ix.DEs = union(ix.DE1, ix.DE2)
     ## general parameters in both groups
     sf1 = sample(sf1, n1, replace=TRUE)
@@ -89,20 +99,20 @@ Simulate2SCE = function(n = 100, perDE = 0.05, estParas1, estParas2) {
     p0.2 = sample(p02, n2, replace=TRUE)
     lambda1 = sample(lambda1, n1, replace=TRUE)
     lambda2= sample(lambda2, n2, replace=TRUE)
-    
+
     ## For Phase I DEGs zero ratio
-    tmp = pi.g2[ix.DE1]  
+    tmp = pi.g2[ix.DE1]
     tmp[tmp < 0.5] = tmp[tmp < 0.5] + runif(sum(tmp<0.5), 0.1, 0.3)
     tmp[tmp >= 0.5] = tmp[tmp >= 0.5] - runif(sum(tmp >=0.5), 0.1, 0.3)
     pi.g2[ix.DE1] = tmp
     pi.df = tmp - pi.g1[ix.DE1]
-    
+
     ## For Phase II DEGs lfc
     tmp = c(rnorm(1000, mean=-1, sd=1), rnorm(1000, mean=1, sd=1))
     mu.diff = sample(tmp, length(ix.DE2))
     mu2[ix.DE2] = mu1[ix.DE2] + mu.diff
     lfc  = mu.diff
-    
+
     ## generate counts in two groups
     y1 = GenerateCountMatrix(pi.g1, p0.1, lambda1, mu1, sigma1, sf1)
     y2 = GenerateCountMatrix(pi.g2, p0.2, lambda2, mu2, sigma2, sf2)
@@ -127,85 +137,70 @@ Simulate2SCE = function(n = 100, perDE = 0.05, estParas1, estParas2) {
 ##################################################################
 ##### Function 2 considering a mixture cell type conditions ######
 ##################################################################
-SimulateMultiSCEs = function(n = 100, perDE = 0.05, estParas, multiProb) {
-    ## Parameters from estimations
-    pi.g = estParas$pi.g
-    p0 = estParas$p0
-    lambda = estParas$lambda
-    mu = estParas$mu
-    sigma = estParas$sd
-    sf = estParas$sf
-    ngene = length(pi.g)
+
+#' Simulate the data for multiple-group comparisons; e.g., different cell types in blood
+#' It simulates the DE changes in two forms corresponding two types of DE genes
+#'
+#' @param n the number of total cells for multiple groups; e.g., 1000, 2000, and etc.
+#' @param estParas_set a set of parameters corresponding to different cell types.
+#' @param multiProb a vector of probilities correponding to each cell type. It is not necessary to sum up to 1 because POWSC will normalize internally.
+#' @param delta1 the minimum of expression change used to determine the Form I DE.
+#' @param delta2 the minimum of log fold change used to determine the Form II DE.
+#' @return a list of simulated datasets. Each dataset corresponds to a pair-wise comparison including a series of metrics such as the DE gene indices for Form I and II DE genes, and simulated expression data in singlecellexperiment format.
+#' @export SimulateMultiSCEs
+SimulateMultiSCEs = function(n = 1000, estParas_set, multiProb, delta1 = 0.1, delta2 = 0.5) {
+    ## Initialize the simAll object
+    celltypeNames = names(estParas_set)
     ncelltype = length(multiProb)
-    ## Simulate index for DE genes. Picking from genes with large means otherwise 
-    ## genes with very small mean won't be detected.
-    nhighGenes = sum(mu > 3)
-    ix.highGenes = order(mu, decreasing=TRUE)[1:nhighGenes]
-    n0 = nhighGenes * perDE
-    
-    multiSize = as.vector(rmultinom(1, n, multiProb))
-    baseSize = multiSize[1]
-    ## Simulate the baseline cell type
-    base.sf = sample(sf, baseSize, replace=TRUE)
-    base.p0 = sample(p0, baseSize, replace=TRUE )
-    base.lambda = sample(lambda, baseSize, replace=TRUE)
-    base.y = GenerateCountMatrix(pi.g, base.p0, base.lambda, mu, sigma, 
-                                 base.sf)
-    base.rslt = list(Y = base.y, ix.DE1 = NULL, ix.DE2 = NULL, pi.g = pi.g, mu = mu)
-    
-    ## Simulate number of the cell types from multinomial distribution
-    simAll = lapply(multiSize[2:ncelltype], function(tmpSize){
-        ix.DE1 = sample(ix.highGenes, n0)
-        ix.DE2 = sample(ix.highGenes, n0)
-        ix.DEs = union(ix.DE1, ix.DE2)
-        ## general new parameters in one new cell type
-        tmp.sf = sample(sf, tmpSize, replace=TRUE)
-        tmp.p0 = sample(p0, tmpSize, replace=TRUE )
-        tmp.lambda = sample(lambda, tmpSize, replace=TRUE)
-        ## perturbation of pi.g / zero ratio in phase I 
-        tmp.pi.g = pi.g
-        tmp = pi.g[ix.DE1]
-        tmp[tmp<0.5] = tmp[tmp<0.5] + runif(sum(tmp<0.5), 0.1, 0.3)
-        tmp[tmp>=0.5] = tmp[tmp>=0.5] - runif(sum(tmp>=0.5), 0.1, 0.3)
-        tmp.pi.g[ix.DE1] = tmp
-        pi.df = tmp.pi.g - pi.g
-        ## perturbation of mu / lfc in phase II
-        tmp.mu = mu
-        tmp = c(rnorm(1000, mean=-1, sd=1), rnorm(1000, mean=1, sd=1))
-        mu.diff = sample(tmp, length(ix.DE2))
-        tmp.mu[ix.DE2] = mu[ix.DE2] + mu.diff
-        lfc  = mu.diff
-        ## generate counts in two groups
-        tmp.y = GenerateCountMatrix(tmp.pi.g, tmp.p0, tmp.lambda, tmp.mu, sigma, tmp.sf)
-        tmp.rslt = list(Y = tmp.y, ix.DE1 = ix.DE1, ix.DE2 = ix.DE2, pi.g = tmp.pi.g, mu = tmp.mu)
-        return(tmp.rslt)
-    })
-    
-    simAll = c(list(base.rslt), simAll)
-    
     SimulateMultiSCEs = NULL
-    for (i in 1:ncelltype) {
-        for (j in i: ncelltype) {
-            if (j  > i){
+    multiSize = as.vector(rmultinom(1, n, multiProb))
+    geneNames = rownames(estParas_set[[1]]$exprs)
+
+    ## pairwisely simulate the data
+    for (i in 1:ncelltype){
+        for (j in i:ncelltype){
+            if (j > i){
                 comID = c(i, j)
-                comName = paste0(i, "_vs_", j)
-                Y = do.call(cbind, lapply(simAll[comID], function(x) x$Y))
-                ix.DE1 = do.call(union, lapply(simAll[comID], function(x) x$ix.DE1))
-                ix.DE2 = do.call(union, lapply(simAll[comID], function(x) x$ix.DE2))
-                pi.g = do.call(cbind, lapply(simAll[comID], function(x) x$pi.g))
-                pi.df = (pi.g[,1] - pi.g[,2])[ix.DE1]
-                mu = do.call(cbind, lapply(simAll[comID], function(x) x$mu))
-                lfc = (mu[,1] - mu[,2])[ix.DE2]
-                rownames(Y) = paste0("g", 1:nrow(Y))
-                celltypes = rep(paste0("celltype", comID), multiSize[comID])
+                compName = paste0(celltypeNames[i], "_vs_", celltypeNames[j])
+                ## two set of parameters
+                Paras_set1 = estParas_set[[i]]; Paras_set2 = estParas_set[[j]]
+                pi.g1 = Paras_set1$pi.g; pi.g2 = Paras_set2$pi.g
+                p01 = Paras_set1$p0; p02 = Paras_set2$p0
+                lambda1 = Paras_set1$lambda; lambda2 = Paras_set2$lambda
+                mu1 = Paras_set1$mu; mu2 = Paras_set2$mu
+                sigma1 = Paras_set1$sd; sigma2 = Paras_set2$sd
+                sf1 = Paras_set1$sf; sf2 = Paras_set2$sf
+                n1 = multiSize[i]; n2 = multiSize[j]
+                ## simulation of cell-wise parameters
+                sf1 = sample(sf1, n1, replace=TRUE)
+                p01 = sample(p01, n1, replace=TRUE )
+                lambda1 = sample(lambda1, n1, replace=TRUE)
+
+                sf2 = sample(sf2, n2, replace=TRUE)
+                p02 = sample(p02, n2, replace=TRUE )
+                lambda2 = sample(lambda2, n2, replace=TRUE)
+
+                Y1 = GenerateCountMatrix(pi.g1, p01, lambda1, mu1, sigma1, sf1)
+                Y2 = GenerateCountMatrix(pi.g2, p02, lambda2, mu2, sigma2, sf2)
+                Y = cbind(Y1, Y2)
+
+                ## Record the DE index
+                tmp0ratio = pi.g2 - pi.g1
+                tmplfc = mu2 - mu1
+                ix.DE1 = which(abs(tmp0ratio) > delta1)
+                ix.DE2 = which(abs(tmplfc) > delta2)
+                celltypes = rep(celltypeNames[comID], multiSize[comID])
+
+                ## Save to sce
                 sce = SingleCellExperiment(
                     assays = list(counts = Y),
-                    rowData = data.frame(geneNames = rownames(Y), stringsAsFactors = F),
+                    rowData = data.frame(geneNames = geneNames, stringsAsFactors = F),
                     colData = data.frame(cellTypes = celltypes, stringsAsFactors = F)
                 )
-                SimulateMultiSCEs[[comName]] = list(sce = sce, ix.DE1 = ix.DE1, ix.DE2 = ix.DE2, 
-                                                pi.df = pi.df, lfc = lfc)
-            }else{
+                SimulateMultiSCEs[[compName]] = list(sce = sce, ix.DE1 = ix.DE1, ix.DE2 = ix.DE2,
+                                                     pi.df = tmp0ratio, lfc = tmplfc)
+            }
+            else{
                 next
             }
         }
@@ -214,6 +209,90 @@ SimulateMultiSCEs = function(n = 100, perDE = 0.05, estParas, multiProb) {
 }
 
 
-
-
+# SimulateMultiSCEs = function(n = 1000, perDE = 0.05, estParas_set, multiProb) {
+#     ## Initialize the simAll object
+#     celltypeNames = names(estParas_set)
+#     ncelltype = length(multiProb)
+#     simAll = vector(mode = "list", length = ncelltype)
+#     ## Baseline Parameters
+#     baseParas = estParas_set[[1]]
+#     pi.g = baseParas$pi.g
+#     p0 = baseParas$p0
+#     lambda = baseParas$lambda
+#     mu = baseParas$mu
+#     sigma = baseParas$sd
+#     sf = baseParas$sf
+#     ngene = length(pi.g)
+#     n0 = round(ngene*perDE)
+#     # Simulate index for DE genes. Picking from genes with large means otherwise
+#     # genes with very small mean won't be detected.
+#     nhighGenes = sum(mu > 2)
+#     ix.highGenes = order(mu, decreasing=TRUE)[1:nhighGenes]
+#
+#     ## Simulate the baseline cell type
+#     multiSize = as.vector(rmultinom(1, n, multiProb))
+#     baseSize = multiSize[1]
+#     base.sf = sample(sf, baseSize, replace=TRUE)
+#     base.p0 = sample(p0, baseSize, replace=TRUE )
+#     base.lambda = sample(lambda, baseSize, replace=TRUE)
+#     base.y = GenerateCountMatrix(pi.g, base.p0, base.lambda, mu, sigma, base.sf)
+#     base.rslt = list(Y = base.y, ix.DE1 = NULL, ix.DE2 = NULL, pi.g = pi.g, mu = mu)
+#     simAll[[1]] = base.rslt
+#     ## Simulate number of the cell types from multinomial distribution
+#     for (i in 2 : ncelltype){
+#         tmpParas = estParas_set[[i]]
+#         tmpSize = multiSize[i]
+#         tmpLfc = tmpParas$mu - mu
+#         tmp0ratio = tmpParas$pi.g - pi.g
+#         ix.DE1 = order(abs(tmp0ratio), decreasing = T)[1:5000]
+#         ix.DE1 = intersect(ix.DE1, ix.highGenes)[1:n0]
+#         ix.DE2 = order(abs(tmpLfc), decreasing = T)[1:5000]
+#         ix.DE2 = intersect(ix.DE2, ix.highGenes)[1:n0]
+#         tmp.sf = sample(tmpParas$sf, tmpSize, replace = T)
+#         tmp.p0 = sample(tmpParas$p0, tmpSize, replace = T)
+#         tmp.lambda = sample(tmpParas$lambda, tmpSize, replace = T)
+#         ## Perturbation of pi.g/zero ratio in phase I; Simulation of Form I DE
+#         tmp.pi.g = pi.g
+#         tmp.pi.g[ix.DE1] = tmpParas$pi.g[ix.DE1]
+#         pi.df = tmp.pi.g - pi.g
+#         ## Perturbation of mu/lfc in phase II; Simulation of Form II DE
+#         tmp.mu = mu
+#         tmp.mu[ix.DE2] = tmpParas$mu[ix.DE2]
+#         lfc = tmpParas$mu - tmp.mu
+#         tmp.sigma = tmpParas$sd
+#         ## Generate count matrix for this cell type
+#         tmp.y = GenerateCountMatrix(tmp.pi.g, tmp.p0, tmp.lambda, tmp.mu, sigma, tmp.sf)
+#         tmp.rslt = list(Y = tmp.y, ix.DE1 = ix.DE1, ix.DE2 = ix.DE2, pi.g = tmp.pi.g, mu = tmp.mu)
+#         simAll[[i]] = tmp.rslt
+#     }
+#
+#     SimulateMultiSCEs = NULL
+#     for (i in 1:ncelltype) {
+#         for (j in i: ncelltype) {
+#             if (j  > i){
+#                 comID = c(i, j)
+#                 comName = paste0(celltypeNames[i], "_vs_", celltypeNames[j])
+#                 Y = do.call(cbind, lapply(simAll[comID], function(x) x$Y))
+#                 ix.DE1 = do.call(union, lapply(simAll[comID], function(x) x$ix.DE1))
+#                 ix.DE2 = do.call(union, lapply(simAll[comID], function(x) x$ix.DE2))
+#                 pi.g = do.call(cbind, lapply(simAll[comID], function(x) x$pi.g))
+#                 pi.df = (pi.g[,1] - pi.g[,2])[ix.DE1]
+#                 mu = do.call(cbind, lapply(simAll[comID], function(x) x$mu))
+#                 lfc = (mu[,1] - mu[,2])[ix.DE2]
+#                 rownames(Y) = paste0("g", 1:nrow(Y))
+#                 celltypes = rep(paste0("celltype", comID), multiSize[comID])
+#                 sce = SingleCellExperiment(
+#                     assays = list(counts = Y),
+#                     rowData = data.frame(geneNames = rownames(Y), stringsAsFactors = F),
+#                     colData = data.frame(cellTypes = celltypes, stringsAsFactors = F)
+#                 )
+#                 SimulateMultiSCEs[[comName]] = list(sce = sce, ix.DE1 = ix.DE1, ix.DE2 = ix.DE2,
+#                                                     pi.df = pi.df, lfc = lfc)
+#             }else{
+#                 next
+#             }
+#         }
+#     }
+#     return(SimulateMultiSCEs)
+# }
 

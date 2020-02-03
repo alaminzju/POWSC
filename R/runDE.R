@@ -12,6 +12,7 @@ toEset = function(sce){
     y = assays(sce)$counts
     cellTypes = colData(sce)$cellTypes
     phenoData = new("AnnotatedDataFrame", data = data.frame(cellTypes = cellTypes))
+    rownames(phenoData) = colnames(y)
     eset = ExpressionSet(assayData = y, phenoData = phenoData)
     return(eset)
 }

@@ -5,8 +5,13 @@
 \title{Run DE analysis by using MAST. Here we output two result tables corresponding to two forms of DE genes.  
 These parameters include four gene-wise parameters and two cell-wise parameters.}
 \usage{
-Power_Disc(DErslt, simData, alpha = 0.1, delta = 0.1, strata = seq(0,
-  1, by = 0.2))
+Power_Disc(
+  DErslt,
+  simData,
+  alpha = 0.1,
+  delta = 0.1,
+  strata = seq(0, 1, by = 0.2)
+)
 }
 \arguments{
 \item{DErslt}{is from the DE analysis by MAST}

@@ -19,7 +19,7 @@ PowerEst = function(fdr, alpha, Zg, Zg2, xgr){
     N = sum(ix.D) ## this is the total discovery
     N.stratified = tapply(ix.D, xgr, sum)
 
-    ##  TD
+    ##  TD (called DE genes)
     id.TP = Zg2==1
     TD = tapply(fdr[id.TP] <= alpha, xgr[id.TP], sum)
     TD[is.na(TD)] = 0
@@ -41,10 +41,10 @@ PowerEst = function(fdr, alpha, Zg, Zg2, xgr){
     FDR = FD / N.stratified
     FDR.marginal = sum(FD, na.rm=TRUE) / N
     
-    ## conditional truths
+    ## conditional truths (true DE genes)
     CT = table(xgr[id.TP])
     
-    list(TD=TD,FD=FD,alpha.nominal=alpha, CT = CT,
+    list(CD=TD,FD=FD,TD=CT,alpha.nominal=alpha, 
          alpha=alpha, alpha.marginal=alpha.marginal,
          power=power, power.marginal=power.marginal,
          FDR=FDR, FDR.marginal=FDR.marginal)
@@ -117,9 +117,9 @@ Power_Disc = function(DErslt, simData, alpha = 0.1, delta = 0.1, strata = seq(0,
     sce = simData$sce
     ntotal = ncol(sce)
     Y = round(assays(sce)[[1]])
-    no0rate = 1 - apply(Y, 1, function(x) sum(x ==0))/ntotal
-    ix.keep = which(no0rate > 0.01) # too small none 0 rate cannot detect
-    xgr = cut(no0rate[ix.keep], strata)
+    rate0 = rowMeans(Y==0)
+    ix.keep = intersect(which(rate0 < 0.99),  which(rate0 > 0.01)) # too small none 0 rate cannot detect
+    xgr = cut(rate0[ix.keep], strata)
     
     # lev = levels(xgr)
     # ix.keep = ix.keep[!(xgr %in% lev[strata.filtered])]
