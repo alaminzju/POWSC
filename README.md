@@ -32,7 +32,7 @@ summary(pow_rslt, Form="II", Cell_Type = "PW")
 ```
 **(3). the second scenairo of multi-group comparisons**
 ```r
-sim_size = 100
+sim_size = 1000
 cell_per = c(0.2, 0.3, 0.5)
 data("GSE67835")
 col = colData(sce)
