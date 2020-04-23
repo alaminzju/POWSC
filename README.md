@@ -7,7 +7,7 @@
 ### 1. Software Installation
 ```
 library(devtools)
-install_github("suke18/POWSC")
+install_github("suke18/POWSC", build_vignettes = T, dependencies = T)
 R CMD INSTALL POWSC_0.1.0.tar.gz # Alternatively, use this command line in the terminal.
 ```
 
@@ -32,9 +32,23 @@ summary(pow_rslt, Form="II", Cell_Type = "PW")
 ```
 **(3). the second scenairo of multi-group comparisons**
 ```r
-sim_size = 1000
+sim_size = 100
 cell_per = c(0.2, 0.3, 0.5)
-pow_rslt = runPOWSC(sim_size = sim_size, est_Paras = est_Paras,per_DE=0.05, DE_Method = "MAST",multi_Prob = cell_per, Cell_Type = "Multi")
-plot(pow_rslt, Form="II", Cell_Type = "Multi")
+data("GSE67835")
+col = colData(sce)
+exprs = assays(sce)$counts
+(tb = table(colData(sce)$Patients, colData(sce)$cellTypes))
+# use AB_S7 patient as example and take three cell types: astrocytes hybrid and neurons
+estParas_set = NULL
+celltypes = c("oligodendrocytes", "hybrid", "neurons")
+for (cp in celltypes){
+    print(cp)
+    ix = intersect(grep(cp, col$cellTypes), grep("AB_S7", col$Patients))
+    tmp_mat = exprs[, ix]
+    tmp_paras = Est2Phase(tmp_mat)
+    estParas_set[[cp]] = tmp_paras
+}
+pow_rslt = runPOWSC(sim_size = sim_size, est_Paras = estParas_set,per_DE=0.05, DE_Method = "MAST",multi_Prob = cell_per, Cell_Type = "Multi")
+plot(pow_rslt, Form="I", Cell_Type = "Multi")
 summary(pow_rslt, Form="II", Cell_Type = "Multi")
 ```
