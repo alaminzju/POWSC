@@ -4,7 +4,7 @@
 **POWSC** is a R package designed for scRNA-seq with a wild range of usage. It can play three roles: **_parameter estimator_**, **_data simulator_**, and **_power assessor_**. As the parameter estimator, POWSC accurately captures the characterized parameters (`Fig.B`) for any specific cell type from a given real expression data (`Fig.A`). As the data simulator, POWSC generates sythetic data (`Fig.C`) based on a rigorous simulation mechanism incluidng zero expression values. As the power assessor, POWSC performs comprehensive power analysis and reports the stratified targeted powers (`Fig.D`) for two forms of DE genes. A schemetic overview of the aglorithm is shown in (`Fig.E`). All the copyrights are explaned by Kenong Su <kenong.su@emory.edu> and Dr. Wu's lab <http://www.haowulab.org>.
 ![workflow](/assets/workflow.png)
 
-This tutorial only includes the basic functionalities of POWSC. Please use the <font color="green">**vignette("SC2P")**</font> to review more detailed package vignette.
+This tutorial introduces the basic functionalities of POWSC. Please use the <font color="blue">**vignette("POWSC")**</font> to review more detailed package vignette.
 
 ### 1. Software Installation
 ```
