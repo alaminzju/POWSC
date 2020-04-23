@@ -4,7 +4,7 @@ import(MAST)
 import(Biobase)
 import(limma)
 import(ggplot2)
-import(colorRampPalette)
+import(grDevices)
 import(SummarizedExperiment)
 importFrom(SummarizedExperiment, colData, assays)
 

@@ -74,7 +74,7 @@ plot.POWSC = function(POWSCobj, Form = c("I", "II"), Cell_Type = c("PW", "Multi"
                      cellwidth = 40, cellheight = 40, legend = F, 
                      border_color = "grey96", na_col = "grey",
                      cluster_row = FALSE, cluster_cols = FALSE,
-                     breaks = seq(0, 1, 0.01)
+                     breaks = seq(0, 1, 0.01),
                      main = paste0("Total Cell Number = ", tmp_size))
         }
     }

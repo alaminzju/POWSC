@@ -10,7 +10,7 @@ Encoding: UTF-8
 Imports:
     SummarizedExperiment,
     SingleCellExperiment,
-    colorRampPalette,
+    grDevices,
     MAST,
     SC2P,
     ggplot2,
