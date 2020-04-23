@@ -1,8 +1,6 @@
 #### RUN DE METHODS #####
 #@param rawEset much has a pData variable called celltype indicator
 
-library(Biobase)
-library(SC2P)
 # Set up global variables
 model = ~ cellTypes + cngeneson # in MAST
 termTotest = "cellTypes" # in SC2P
@@ -16,6 +14,13 @@ toEset = function(sce){
     eset = ExpressionSet(assayData = y, phenoData = phenoData)
     return(eset)
 }
+
+
+#' Run DE analysis by using SC2P. Here we output two result tables corresponding to two forms of DE genes.  
+#' 
+#' @param sce is a simulated scRNA-seq dataset with two-group conditions, e.g., treatment vs control. 
+#' @return a list of three tables: the first table summaries the DE result for both forms of DE genes. cont table represents the result for continous case. disc table shows the result for discontinous case. 
+#' @export runSC2P
 ## SC2P
 runSC2P = function(sce) {
     rawEset = toEset(sce = sce); ngene = nrow(sce)
@@ -26,7 +31,6 @@ runSC2P = function(sce) {
     disc = data.frame(geneIndex = 1:length(discPval), pval = discPval, fdr = discFdr)
     cont = data.frame(geneIndex = 1:length(contPval), pval = contPval, fdr = contFdr)
     rownames(disc) = rownames(cont) = rownames(deSC2P)
-    disc = disc[complete.cases(disc), ]; cont = cont[complete.cases(cont), ]
     return(list(table = deSC2P, cont = cont, disc = disc))
 }
 
@@ -64,7 +68,12 @@ runMAST = function(sce) {
 }
 
 
-## runDE summary function 
+#' A wrapper function for calling DE genes. This contains two methods: MAST and SC2P
+#' 
+#' @param sce is a simulated scRNA-seq dataset with two-group conditions, e.g., treatment vs control. 
+#' @param DE_Method is a string chosen from "MAST" or "SC2P".
+#' @return a list of three tables: the first table summaries the DE result for both forms of DE genes. cont table represents the result for continous case. disc table shows the result for discontinous case. 
+#' @export runDE
 runDE = function(sce, DE_Method = c("MAST", "SC2P")){
     DE_Method = match.arg(DE_Method)
     if (DE_Method == "MAST"){
@@ -83,89 +92,89 @@ runDE = function(sce, DE_Method = c("MAST", "SC2P")){
 ############################## other DE methods ############################## 
 ##############################################################################
 ## BPSC
-runBPSC = function(rawEset) {
-    require(BPSC)
-    Y = exprs(rawEset)
-    sf = colSums(Y)/1e6
-    bp_mat = sweep(Y, 2, sf, FUN="/")+1
-    groups = as.factor(droplevels(pData(rawEset)$celltype))
-    controlIds = which(groups==levels(groups)[1])
-    design = model.matrix( ~ groups)
-    rslt = BPglm(data = bp_mat,
-                     controlIds = controlIds, design = design, coef = 2,
-                     estIntPar = FALSE)
-    table = summary(rslt)$topTable
-    pval = table[, 3]
-    pval[is.na(pval)] <- 1
-    qval  = qvalue(pval)$qvalues
-
-    ## construct results, ordered by the orignal order of genes
-    ix = sort(pval, index.return=TRUE)$ix
-    result = data.frame(geneIndex=ix, pval=pval[ix], qval=qval[ix])
-    res = result[order(result$geneIndex),]
-    return(res)
-}
-
-# SCDD
-runSCDD = function(simData){
-    require("SingleCellExperiment"); require("scDD")
-    Y = exprs(rawEset)
-    sf = colSums(Y)/1e6
-    ltpm = log2(sweep(Y, 2, sf, FUN="/")+1)
-    group = as.factor(droplevels(pData(rawEset)$celltype))
-    priorParam = list(alpha=0.01, mu0=0, s0=0.01, a0=0.01, b0=0.01)
-    sce = SingleCellExperiment(assays=list(normcounts = as.matrix(ltpm)), colData=data.frame(condition = group))
-    rslt = scDD(sce, priorParam, testZeroes=F)
-    table = results(rslt)
-    pval = table[, 7]
-    pval[is.na(pval)] <- 1
-    fdr  = qvalue::lfdr(pval)
-
-    ## construct results, ordered by the orignal order of genes
-    ix = sort(pval, index.return=TRUE)$ix
-    result = data.frame(geneIndex=ix, pval=pval[ix], fdr=fdr[ix])
-    res = result[order(result$geneIndex),]
-    return(res)
-}
-
-
-## SCDE
-runSCDE = function(rawEset, ncores=32) {
-    require(scde)
-    Y = exprs(rawEset)
-    Y = apply(Y,2,function(x) {
-        storage.mode(x) <- 'integer'; x})
-    colnames(Y) = 1:ncol(Y)
-    cd = clean.counts(Y)
-    sg = (pData(rawEset)$celltype)[as.integer(colnames(cd))]
-    o.ifm = scde.error.models(counts=cd, groups=sg, n.cores=ncores,
-                               threshold.segmentation = TRUE,
-                               save.crossfit.plots = FALSE,
-                               save.model.plots = FALSE, verbose = 1)
-
-    valid.cells = o.ifm$corr.a > 0
-    table(valid.cells)
-    o.ifm = o.ifm[valid.cells, ]
-    o.prior = scde.expression.prior(models = o.ifm,
-                                     counts = cd, length.out = 400,
-                                     show.plot = FALSE)
-    groups = sg[valid.cells]
-    de.scde = scde.expression.difference(o.ifm, cd, o.prior,
-                                          groups  =  groups,
-                                          n.randomizations  =  100,
-                                          n.cores  =  ncores,
-                                          verbose  =  0)
-    return(de.scde)
-}
-
-
-makeROC = function(pval, trueDE) {
-    pred = prediction(-log10(pval), trueDE)
-    auc = performance(pred,"auc")
-    auc = unlist(slot(auc, "y.values"))
-    perf = performance(pred,"tpr","fpr")
-    return(list(perf = perf, auc = auc))
-}
+# runBPSC = function(rawEset) {
+#     require(BPSC)
+#     Y = exprs(rawEset)
+#     sf = colSums(Y)/1e6
+#     bp_mat = sweep(Y, 2, sf, FUN="/")+1
+#     groups = as.factor(droplevels(pData(rawEset)$celltype))
+#     controlIds = which(groups==levels(groups)[1])
+#     design = model.matrix( ~ groups)
+#     rslt = BPglm(data = bp_mat,
+#                      controlIds = controlIds, design = design, coef = 2,
+#                      estIntPar = FALSE)
+#     table = summary(rslt)$topTable
+#     pval = table[, 3]
+#     pval[is.na(pval)] <- 1
+#     qval  = qvalue(pval)$qvalues
+# 
+#     ## construct results, ordered by the orignal order of genes
+#     ix = sort(pval, index.return=TRUE)$ix
+#     result = data.frame(geneIndex=ix, pval=pval[ix], qval=qval[ix])
+#     res = result[order(result$geneIndex),]
+#     return(res)
+# }
+# 
+# # SCDD
+# runSCDD = function(simData){
+#     require("SingleCellExperiment"); require("scDD")
+#     Y = exprs(rawEset)
+#     sf = colSums(Y)/1e6
+#     ltpm = log2(sweep(Y, 2, sf, FUN="/")+1)
+#     group = as.factor(droplevels(pData(rawEset)$celltype))
+#     priorParam = list(alpha=0.01, mu0=0, s0=0.01, a0=0.01, b0=0.01)
+#     sce = SingleCellExperiment(assays=list(normcounts = as.matrix(ltpm)), colData=data.frame(condition = group))
+#     rslt = scDD(sce, priorParam, testZeroes=F)
+#     table = results(rslt)
+#     pval = table[, 7]
+#     pval[is.na(pval)] <- 1
+#     fdr  = qvalue::lfdr(pval)
+# 
+#     ## construct results, ordered by the orignal order of genes
+#     ix = sort(pval, index.return=TRUE)$ix
+#     result = data.frame(geneIndex=ix, pval=pval[ix], fdr=fdr[ix])
+#     res = result[order(result$geneIndex),]
+#     return(res)
+# }
+# 
+# 
+# ## SCDE
+# runSCDE = function(rawEset, ncores=32) {
+#     require(scde)
+#     Y = exprs(rawEset)
+#     Y = apply(Y,2,function(x) {
+#         storage.mode(x) <- 'integer'; x})
+#     colnames(Y) = 1:ncol(Y)
+#     cd = clean.counts(Y)
+#     sg = (pData(rawEset)$celltype)[as.integer(colnames(cd))]
+#     o.ifm = scde.error.models(counts=cd, groups=sg, n.cores=ncores,
+#                                threshold.segmentation = TRUE,
+#                                save.crossfit.plots = FALSE,
+#                                save.model.plots = FALSE, verbose = 1)
+# 
+#     valid.cells = o.ifm$corr.a > 0
+#     table(valid.cells)
+#     o.ifm = o.ifm[valid.cells, ]
+#     o.prior = scde.expression.prior(models = o.ifm,
+#                                      counts = cd, length.out = 400,
+#                                      show.plot = FALSE)
+#     groups = sg[valid.cells]
+#     de.scde = scde.expression.difference(o.ifm, cd, o.prior,
+#                                           groups  =  groups,
+#                                           n.randomizations  =  100,
+#                                           n.cores  =  ncores,
+#                                           verbose  =  0)
+#     return(de.scde)
+# }
+# 
+# 
+# makeROC = function(pval, trueDE) {
+#     pred = prediction(-log10(pval), trueDE)
+#     auc = performance(pred,"auc")
+#     auc = unlist(slot(auc, "y.values"))
+#     perf = performance(pred,"tpr","fpr")
+#     return(list(perf = perf, auc = auc))
+# }
 
 
 ### Main function #### should rewrite this function

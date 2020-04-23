@@ -37,7 +37,7 @@ suppressMessages(library(POWSC))
 #  #########
 #  #########  Simulation part
 #  #########
-#  sim = SimulateMultiSCEs_New(n = 6000, estParas_set = estParas_set, multiProb = cell_per)
+#  sim = SimulateMultiSCEs(n = 6000, estParas_set = estParas_set, multiProb = cell_per)
 #  
 #  #########
 #  #########  DE analysis part
@@ -49,11 +49,8 @@ suppressMessages(library(POWSC))
 #  }
 #  
 #  #########
-#  ######### Demonstrate the result by heatmap
+#  ######### Summarize the power result
 #  #########
-#  library(RColorBrewer); library(pheatmap)
-#  breaksList = seq(0, 1, by = 0.01)
-#  colors = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(length(breaksList))
 #  pow_rslt = pow1 = pow2 = pow1_marg = pow2_marg = NULL
 #  TD = CD = NULL
 #  for (comp in names(sim)){
@@ -67,6 +64,12 @@ suppressMessages(library(POWSC))
 #      pow2 = rbind(pow2, tmp2$power)
 #  }
 #  
+#  #########
+#  ######### Demonstrate the result by heatmap
+#  #########
+#  library(RColorBrewer); library(pheatmap)
+#  breaksList = seq(0, 1, by = 0.01)
+#  colors = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(length(breaksList))
 #  dimnames(pow1) = list(names(sim), names(tmp1$CD))
 #  dimnames(pow2) = list(names(sim), names(tmp2$CD))
 #  pheatmap(pow1, display_numbers = T, color=colors, show_rownames = T,

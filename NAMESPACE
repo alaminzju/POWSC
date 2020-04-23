@@ -1,10 +1,12 @@
 import(SC2P)
 import(pheatmap)
 import(MAST)
+import(Biobase)
+import(limma)
 import(ggplot2)
-import(RColorBrewer)
-import(SingleCellExperiment)
-importFrom(SummarizedExperiment, assays)
+import(colorRampPalette)
+import(SummarizedExperiment)
+importFrom(SummarizedExperiment, colData, assays)
 
 export(
     Est2Phase,
@@ -13,7 +15,7 @@ export(
     SimulateMultiSCEs,
     runDE,
     runMAST,
-    runBPSC,
+    runSC2P,
     PowerEst,
     Power_Disc,
     Power_Cont,

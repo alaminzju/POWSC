@@ -5,6 +5,12 @@
 #' @param sim_size a list of numbers 
 #' @param per_DE the precentage of the DE genes
 #' @param est_Paras the template parameter estimated from one cell type
+#' @param DE_Method is a string chosen from "MAST" or "SC2P".
+#' @param Cell_Type is a string corresponding to the 1st scenario: same cell type comparison, and 2nd scenario: multiple cell types.
+#' @param multi_Prob is the mixture cell proportions which sum up to 1. If not summing up to 1, then the package will internally do the normalization procedure. 
+#' @param alpha is the cutoff for the fdr which can be modified
+#' @param disc_delta or the zero ratio change is the cutoff (=0.1) used to determined the high DE genes for Form II
+#' @param cont_delta or the lfc is the cutoff (=0.5) used to determined the high DE genes for Form II
 #' @return POWSC object
 #' @export runPOWSC
 ######## POWSC ######## 
@@ -30,7 +36,7 @@ runPOWSC = function(sim_size = c(50, 100, 200, 800, 1000), per_DE = 0.05, est_Pa
         }
         for (tmp_size in sim_size){
             pow1_rslt = pow2_rslt = NULL
-            sim_Data = SimulateMultiSCEs(n = tmp_size, estParas = est_Paras, multiProb = multi_Prob)
+            sim_Data = SimulateMultiSCEs(n = tmp_size, estParas_set = est_Paras, multiProb = multi_Prob)
             for (comp in names(sim_Data)){
                 tmp_DE = runDE(sim_Data[[comp]]$sce, DE_Method = DE_Method)
                 pow1_rslt[[comp]] = Power_Disc(DErslt = tmp_DE, simData = sim_Data[[comp]], alpha = alpha, delta = disc_delta)
@@ -62,11 +68,13 @@ plot.POWSC = function(POWSCobj, Form = c("I", "II"), Cell_Type = c("PW", "Multi"
             }else{
                 pow = pow2_mat
             }
-            pheatmap(pow,display_numbers = T, color=colors, show_rownames = T, 
-                     cellwidth = 50, cellheight = 50, legend = T, 
+            
+            pheatmap(pow,display_numbers = T, color=colors, show_rownames = F, 
+                     show_colnames = T, fontsize = 20, fontsize_col = 20,
+                     cellwidth = 40, cellheight = 40, legend = F, 
                      border_color = "grey96", na_col = "grey",
                      cluster_row = FALSE, cluster_cols = FALSE,
-                     breaks = seq(0, 1, 0.01),
+                     breaks = seq(0, 1, 0.01)
                      main = paste0("Total Cell Number = ", tmp_size))
         }
     }
@@ -83,21 +91,26 @@ plot.POWSC = function(POWSCobj, Form = c("I", "II"), Cell_Type = c("PW", "Multi"
         if (Form == "I"){
             pow = pow1
             tit = ggtitle("Form I DE genes")
-            tmpxlab = xlab("strata of zero ratios across samples")
+            tmpxlab = xlab("strata of zero ratios")
         }else{
             pow = pow2
             tit = ggtitle("Form II DE genes")
             tmpxlab = xlab("strata of average reads")
         }
-        gp = ggplot(pow, aes(x=Strata, y=Power, group=Reps, color=Reps)) +
+        breaks = round(seq(0, 1, length = 6), 1)
+        ggplot(pow, aes(x=Strata, y=Power, group=Reps, color=Reps)) +
             geom_line(aes(color=Reps, linetype = Reps), size = 0.6)+
             geom_point(aes(color=Reps, shape = Reps), size = 1.5) +
             scale_colour_brewer(palette = "Set1") +
-            tmpxlab + ylab("power") + theme_classic() +
-            scale_y_continuous(breaks=seq(0,1,by=0.1),limits = c(0, 1), labels=seq(0,1,by=0.1))+
-            theme(legend.position = c(0.5, 0.1), legend.direction = "horizontal") +
-            theme(plot.title = element_text(size=16, face="bold"))+ tit
-        plot(gp)
+            tmpxlab + tit + theme_classic()  + 
+            scale_y_continuous(breaks=breaks, limits = c(0, 1+0.1), labels=format(breaks, nsmall = 1))+
+            theme(legend.position = c(0.5, 0.95), legend.direction = "horizontal") +
+            theme(plot.title = element_text(size=16, face="bold"),
+                  axis.text.x=element_text(colour="black", size = 14), 
+                  axis.text.y=element_text(colour="black", size = 14),
+                  legend.title = element_text(size = 15),
+                  legend.text = element_text(size = 15),
+                  axis.title.y = element_text(size = 15))
     }
 }
 

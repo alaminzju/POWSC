@@ -1,21 +1,22 @@
 Package: POWSC
 Type: Package
-Title: Power assessments for scRNA-seq
+Title: Simulation, power evaluation, and sample size recommendation for single cell RNA-seq
 Version: 0.1.0
 Author: Kenong Su, Zhijin Wu, Hao Wu
 Maintainer: The package maintainer <kenong.su@emory.edu>
 Description: POWSC provides modules for accurately simulating scRNA-seq data and comprehensively conducting power analysis.  
-License: GPL-2
+License: GPL 
 Encoding: UTF-8
 Imports:
     SummarizedExperiment,
     SingleCellExperiment,
+    colorRampPalette,
     MAST,
     SC2P,
     ggplot2,
     pheatmap
 LazyData: true
-Depends: R (>= 3.3.0), Biobase, limma
+Depends: R (>= 3.3.0), Biobase, limma, SingleCellExperiment
 Suggests: 
     knitr,
     rmarkdown
