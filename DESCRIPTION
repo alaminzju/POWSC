@@ -11,6 +11,7 @@ Imports:
     SummarizedExperiment,
     SingleCellExperiment,
     grDevices,
+    RColorBrewer,
     MAST,
     SC2P,
     ggplot2,
