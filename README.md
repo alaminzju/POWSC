@@ -4,7 +4,7 @@
 **POWSC** is a R package designed for scRNA-seq with a wild range of usage. It can play three roles: **_parameter estimator_**, **_data simulator_**, and **_power assessor_**. As the parameter estimator, POWSC accurately captures the characterized parameters (`Fig.B`) for any specific cell type from a given real expression data (`Fig.A`). As the data simulator, POWSC generates sythetic data (`Fig.C`) based on a rigorous simulation mechanism incluidng zero expression values. As the power assessor, POWSC performs comprehensive power analysis and reports the stratified targeted powers (`Fig.D`) for two forms of DE genes. A schemetic overview of the aglorithm is shown in (`Fig.E`). All the copyrights are explaned by Kenong Su <kenong.su@emory.edu> and Dr. Wu's lab <http://www.haowulab.org>.
 ![workflow](/assets/workflow.png)
 
-This tutorial introduces the basic functionalities of POWSC. Please use the <font color="blue">**vignette("POWSC")**</font> to review more detailed package vignette. It is worth noting that one might need pre-install dependent R packages such as MAST, SC2P, and SummarizedExperiment. 
+This tutorial introduces the basic functionalities of POWSC. Please use the <font color="blue">**vignette("POWSC")**</font> to review more detailed package vignette. It is worth noting that one might need pre-install dependent R packages such as MAST, SC2P, and SummarizedExperiment.
 
 ### 1. Software Installation
 ```
@@ -27,7 +27,7 @@ est_Paras = Est2Phase(sce_small)
 
 **(2). the first scenairo of two-group comparison**
 ```r
-sim_size = c(100, 400, 1000) # A numeric vector
+sim_size = c(200, 500, 1000) # A numeric vector
 pow_rslt = runPOWSC(sim_size = sim_size, est_Paras = est_Paras,per_DE=0.05, DE_Method = "MAST", Cell_Type = "PW")
 plot(pow_rslt, Form="II", Cell_Type = "PW") # Alternatively, we can use Form="I"
 summary(pow_rslt, Form="II", Cell_Type = "PW")
