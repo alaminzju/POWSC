@@ -17,7 +17,7 @@ Imports:
     ggplot2,
     pheatmap
 LazyData: true
-Depends: R (>= 3.3.0), Biobase, limma, SingleCellExperiment
+Depends: R (>= 3.3.0), Biobase, limma, SingleCellExperiment, MAST, SC2P
 Suggests: 
     knitr,
     rmarkdown
