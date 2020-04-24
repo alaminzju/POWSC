@@ -19,14 +19,13 @@ R CMD INSTALL POWSC_0.1.0.tar.gz # Alternatively, use this command line in the t
 library(POWSC)
 data("es_mef_sce")
 sce = es_mef_sce[, colData(es_mef_sce)$cellTypes == "fibro"]
-set.seed(1)
 est_Paras = Est2Phase(sce)
 ```
 
 **(2). the first scenairo of two-group comparison**
 ```r
 sim_size = c(100, 400, 1000) # A numeric vector
-pow_rslt = runPOWSC(sim_size = sim_size, est_Paras = est_Paras,per_DE=0.05, DE_Method = "MAST", Cell_Type = "PW")
+pow_rslt = runPOWSC(sim_size = sim_size, est_Paras = est_Paras,per_DE=0.05, DE_Method = "MAST", Cell_Type = "PW") # Note, using our previous developed tool SC2P is faster.
 plot(pow_rslt, Form="II", Cell_Type = "PW") # Alternatively, we can use Form="I"
 summary(pow_rslt, Form="II", Cell_Type = "PW")
 ```
