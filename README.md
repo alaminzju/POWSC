@@ -20,14 +20,12 @@ library(POWSC)
 data("es_mef_sce")
 sce = es_mef_sce[, colData(es_mef_sce)$cellTypes == "fibro"]
 set.seed(1)
-# For demonstration purpose, we extract a small dataset (5000 genes) here:
-sce_small = sce[sample(1:nrow(sce), 5000),]
-est_Paras = Est2Phase(sce_small)
+est_Paras = Est2Phase(sce)
 ```
 
 **(2). the first scenairo of two-group comparison**
 ```r
-sim_size = c(200, 500, 1000) # A numeric vector
+sim_size = c(100, 400, 1000) # A numeric vector
 pow_rslt = runPOWSC(sim_size = sim_size, est_Paras = est_Paras,per_DE=0.05, DE_Method = "MAST", Cell_Type = "PW")
 plot(pow_rslt, Form="II", Cell_Type = "PW") # Alternatively, we can use Form="I"
 summary(pow_rslt, Form="II", Cell_Type = "PW")
