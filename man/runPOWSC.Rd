@@ -22,6 +22,18 @@ runPOWSC(
 \item{per_DE}{the precentage of the DE genes}
 
 \item{est_Paras}{the template parameter estimated from one cell type}
+
+\item{DE_Method}{is a string chosen from "MAST" or "SC2P".}
+
+\item{Cell_Type}{is a string corresponding to the 1st scenario: same cell type comparison, and 2nd scenario: multiple cell types.}
+
+\item{multi_Prob}{is the mixture cell proportions which sum up to 1. If not summing up to 1, then the package will internally do the normalization procedure.}
+
+\item{alpha}{is the cutoff for the fdr which can be modified}
+
+\item{disc_delta}{or the zero ratio change is the cutoff (=0.1) used to determined the high DE genes for Form II}
+
+\item{cont_delta}{or the lfc is the cutoff (=0.5) used to determined the high DE genes for Form II}
 }
 \value{
 POWSC object
