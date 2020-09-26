@@ -10,16 +10,13 @@ The corresponding paper can be found here <https://academic.oup.com/bioinformati
 
 ---
 references:
-- id: POWSC
+- POWSC
   title: Simulation, power evaluation and sample size recommendation for single-cell RNA-seq
   author:
-  - family: Su
-    given: Kenong
-  container-title: Bioinformatics 
-  volume: 36
+  - Su
+    Kenong
   URL: 'https://academic.oup.com/bioinformatics/advance-article-abstract/doi/10.1093/bioinformatics/btaa607/5866544'
   DOI: https://doi.org/10.1093/bioinformatics/btaa607
-  issue: 10
   publisher: Bioinformatics
 ---
 
