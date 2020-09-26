@@ -6,7 +6,7 @@
 
 This tutorial introduces the basic functionalities of POWSC. Please use the <font color="blue">**vignette("POWSC")**</font> to review more detailed package vignette. It is worth noting that one might need pre-install dependent R packages such as MAST, SC2P, and SummarizedExperiment.
 
-The corresponding paper can be found here <https://academic.oup.com/bioinformatics/advance-article-abstract/doi/10.1093/bioinformatics/btaa607/5866544>. 
+The corresponding paper can be found here:
 
 ---
 references:
