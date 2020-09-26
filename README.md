@@ -6,6 +6,24 @@
 
 This tutorial introduces the basic functionalities of POWSC. Please use the <font color="blue">**vignette("POWSC")**</font> to review more detailed package vignette. It is worth noting that one might need pre-install dependent R packages such as MAST, SC2P, and SummarizedExperiment.
 
+The corresponding paper can be found here <https://academic.oup.com/bioinformatics/advance-article-abstract/doi/10.1093/bioinformatics/btaa607/5866544>. 
+
+---
+references:
+- id: POWSC
+  title: Simulation, power evaluation and sample size recommendation for single-cell RNA-seq
+  author:
+  - family: Su
+    given: Kenong
+  container-title: Bioinformatics 
+  volume: 36
+  URL: 'https://academic.oup.com/bioinformatics/advance-article-abstract/doi/10.1093/bioinformatics/btaa607/5866544'
+  DOI: https://doi.org/10.1093/bioinformatics/btaa607
+  issue: 10
+  publisher: Bioinformatics
+---
+
+
 ### 1. Software Installation
 ```
 library(devtools)
