@@ -20,6 +20,9 @@ references:
   publisher: Bioinformatics
 ---
 
+### How to get help for POWSC
+Any POWSC questions should be posted to the GitHub Issue section of POWSC homepage at https://github.com/suke18/POWSC/issues. 
+
 
 ### 1. Software Installation
 ```
